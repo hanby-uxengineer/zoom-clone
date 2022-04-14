@@ -1,3 +1,5 @@
+import http from "http";
+import WebSocket from "ws";
 import express from "express";
 import res from "express/lib/response";
 
@@ -10,4 +12,17 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
-app.listen(3000);
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server( {server} );   // create web socket server on the top of http server
+
+wss.on("connection", (socket) => {
+    console.log("✅ connected to browser.");
+    socket.on("close", () => console.log("⛔️ disconnected from browser."));
+    socket.on("message", (message) => {
+        console.log(message.toString('utf8'));
+    });
+    socket.send("hello.");
+});
+
+server.listen(3000, handleListen); 
